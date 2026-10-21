@@ -51,12 +51,7 @@ export type ModuleId = z.infer<typeof moduleSchema>;
  * module (e.g. `programs`); navigation intersects `enabledModules` with this
  * list so config stays forward-compatible without rendering dead links.
  */
-export const SHIPPED_MODULES: readonly ModuleId[] = [
-  'clients',
-  'sessions',
-  'scheduling',
-  'payments',
-] as const;
+export const SHIPPED_MODULES: readonly ModuleId[] = ['clients', 'sessions'] as const;
 
 // ---------------------------------------------------------------------------
 // Dashboard widgets
