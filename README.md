@@ -41,9 +41,16 @@ integration keys can be added as you connect each service.
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase → Project Settings → API | Auth (browser + server) |
 | `SUPABASE_SERVICE_ROLE_KEY` | Supabase → Project Settings → API | Webhooks and admin-side writes |
 
-> `DATABASE_URL`: use the **session pooler** string for the app and the **direct connection**
-> string for migrations if your network blocks port 5432. `prepare: false` is already set for
-> pooler compatibility.
+> **`DATABASE_URL` must be a pooler string, not the direct host.** `db.<ref>.supabase.co` is
+> IPv6-only, so it is unreachable from Vercel (IPv4-only) even though it works from a dev machine
+> with IPv6. Copy the pooler URI from the dashboard's **Connect** button:
+>
+> | Where | Port | Mode |
+> |---|---|---|
+> | Vercel | `6543` | Transaction — short-lived serverless invocations |
+> | Local dev and `npm run db:migrate` | `5432` | Session — needed for migration locks and DDL |
+>
+> `prepare: false` is already set in `lib/db/index.ts` for pooler compatibility.
 
 ### Google sign-in
 

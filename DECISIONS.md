@@ -36,3 +36,32 @@ from older shadcn/Radix docs needs converting.
 Drizzle generates the DDL; row-level-security policies live in hand-written migration files under
 `lib/db/migrations/`. RLS is defence-in-depth only — **application-layer `workspace_id` scoping in
 `lib/db/queries/*` is the primary guarantee**, per spec rule 3.
+
+---
+
+## Phase 1
+
+### D-007 — Connect through the Supabase pooler, never the direct host
+Supabase's direct database host (`db.<ref>.supabase.co`) publishes **only an AAAA record** — it is
+IPv6-only. Vercel's serverless functions are IPv4-only, so every query from production failed while
+the same URL worked from a developer machine with IPv6. The failure surfaced as a generic
+"Something went wrong" error boundary, because Next.js strips error detail from client boundaries in
+production.
+
+Use the pooler, which resolves to IPv4:
+
+| Where | Port | Mode | Why |
+|---|---|---|---|
+| Vercel | 6543 | transaction | Each function invocation is short-lived; transaction mode does not hold a backend between statements |
+| Local dev + `db:migrate` | 5432 | session | Session mode supports the advisory locks and DDL that drizzle-kit needs |
+
+`prepare: false` is already set in `lib/db/index.ts`, which both pooler modes require.
+
+The pooler hostname is region-specific (`aws-0-<region>.pooler.supabase.com`) and the username is
+`postgres.<project-ref>`. Copy the exact string from the dashboard's **Connect** button rather than
+assembling it by hand.
+
+### D-008 — Owner deletion cascades
+See the `0002_owner_delete_cascade` migration. Deleting a coach's auth user deletes their workspace
+and everything in it. Phase 3 must require ownership transfer before an owner can be removed from a
+shared workspace.
