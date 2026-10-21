@@ -4,7 +4,7 @@ import { redirect } from 'next/navigation';
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
 import { createClient } from '@/lib/supabase/server';
-import { publicEnv } from '@/lib/env';
+import { appUrl } from '@/lib/env';
 import { WORKSPACE_COOKIE } from '@/lib/auth/workspace-context';
 import { cookies } from 'next/headers';
 
@@ -62,7 +62,7 @@ export async function signUpWithPassword(
     password: parsed.data.password,
     options: {
       data: { full_name: parsed.data.fullName },
-      emailRedirectTo: `${publicEnv.appUrl}/auth/callback`,
+      emailRedirectTo: `${appUrl()}/auth/callback`,
     },
   });
 
@@ -88,7 +88,7 @@ export async function signInWithGoogle(): Promise<never> {
   const supabase = await createClient();
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: 'google',
-    options: { redirectTo: `${publicEnv.appUrl}/auth/callback` },
+    options: { redirectTo: `${appUrl()}/auth/callback` },
   });
 
   if (error || !data.url) {

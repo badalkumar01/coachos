@@ -46,10 +46,32 @@ export function serviceRoleKey(): string {
  * rewrite these as dynamic lookups.
  */
 export const publicEnv = {
-  appUrl: process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000',
   supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL ?? '',
   supabaseAnonKey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? '',
 } as const;
+
+/**
+ * The app's own origin, used to build OAuth and email-confirmation redirects.
+ *
+ * Server-side only — it reads Vercel's deployment vars, which are not exposed
+ * to the browser. Resolution order:
+ *
+ *   1. NEXT_PUBLIC_APP_URL, when set explicitly (local dev, custom domain).
+ *   2. VERCEL_PROJECT_PRODUCTION_URL — the stable production domain Vercel
+ *      injects into every deployment, preview builds included. Preview URLs are
+ *      deliberately not used: Supabase only allows redirects back to domains on
+ *      its allowlist, and that is the production one.
+ *   3. localhost, for `next build` and tooling outside Vercel.
+ */
+export function appUrl(): string {
+  const explicit = process.env.NEXT_PUBLIC_APP_URL;
+  if (explicit) return explicit.replace(/\/+$/, '');
+
+  const vercel = process.env.VERCEL_PROJECT_PRODUCTION_URL;
+  if (vercel) return `https://${vercel}`;
+
+  return 'http://localhost:3000';
+}
 
 export function requirePublicEnv(): { supabaseUrl: string; supabaseAnonKey: string } {
   if (!publicEnv.supabaseUrl || !publicEnv.supabaseAnonKey) {
