@@ -15,6 +15,13 @@
       "when": 1786794907225,
       "tag": "0001_rls_and_auth_sync",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1788997601928,
+      "tag": "0002_owner_delete_cascade",
+      "breakpoints": true
     }
   ]
 }

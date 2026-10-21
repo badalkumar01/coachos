@@ -77,7 +77,7 @@ export const workspaces = pgTable(
     name: text('name').notNull(),
     ownerUserId: uuid('owner_user_id')
       .notNull()
-      .references(() => users.id, { onDelete: 'restrict' }),
+      .references(() => users.id, { onDelete: 'cascade' }),
     /** Logo url, accent colour — drives booking page + portal theming. */
     branding: jsonb('branding')
       .$type<{ logoUrl?: string; accentColor?: string }>()
